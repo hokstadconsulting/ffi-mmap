@@ -1,16 +1,32 @@
-DR=docker run --rm -t -i -v ${PWD}:/app ${IMAGE}
+DR=docker run -t -i -v ${PWD}:/app ${IMAGE}
 B=${DR} bundle
+BE=${B} exec
+
+build: container
+	echo Building gem
+	rm -f pkg/*
+	${BE} rake build
+
+push: build
+	gem push `/bin/ls -q pkg/* | tail -n1`
 
 container: Dockerfile
 	docker build -t ${IMAGE} .
 
+update: container
+	${B} update
+
 bundle: container
-	${B} install --path=./vendor/bundle
+	${B} install --binstubs ./bin --path=./vendor/bundle
 
 rdoc:
 	rm -rf doc
-	${B} rdoc --main=README.md -O -U -x'~' README.md lib
+	${BE} rdoc --main=README.md -O -U -x'~' README.md lib
 
 .PHONY: spec
 spec:
-	${B} exec rspec ./spec
+	${BE} rspec ./spec
+
+
+cli:
+	${DR} /bin/bash -l
