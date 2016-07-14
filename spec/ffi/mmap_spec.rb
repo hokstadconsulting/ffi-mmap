@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe FFI::Mmap do
-  let(:data) { rand(255).chr*4096 }
+  let(:data) { (0..4095).collect { rand(255).chr }.join }
 
   let(:m) {
         File.open("/tmp/mmaptest","wb") {|f| f.write(data) }
@@ -22,6 +22,9 @@ describe FFI::Mmap do
     it 'accepts a range and returns the file contents in that range' do
         expect(m[0..4095]).to eq(data)
     end
+
+    it 'truncates the result to the file size' do
+        expect(m[4090..4097]).to eq(data[4090..4097])
+    end
   end
-  
 end
