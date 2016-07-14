@@ -14,9 +14,9 @@ module FFI
         MAP_SHARED=1
         
         def initialize(filename, mode, flags)
-            @f = ::IO.sysopen(filename) # FIXME: mode
-            @len = 4096 # FIXME
-            @m = FFI::AutoPointer.new(Internal.mmap(nil,@len,PROT_READ,MAP_SHARED,@f,0),
+            @f    = File.open(filename, mode)
+            @size = @f.size
+            @m    = FFI::AutoPointer.new(Internal.mmap(nil,@size,PROT_READ, flags,@f.fileno,0),
                 self.method(:munmap))
             raise "Mmap failed" if @m.address == 0xffffffffffffffff
         end
@@ -28,7 +28,10 @@ module FFI
         end
         
         def[] ndx
-            @m.get_bytes(ndx.first, ndx.last - ndx.first+1)
+            first = ndx.first
+            last  = ndx.last
+            last = @size-1 if last >= 0 && last >= @size
+            @m.get_bytes(first, last - first+1)
         end
     end
 end
