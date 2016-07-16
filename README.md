@@ -1,12 +1,40 @@
 
 # FFI::Mmap
 
-**WARNING**: This is **VERY** incomplete as of writing this. 
+**WARNING**: This is **VERY** incomplete as of writing this. It basically
+only supports read-only shared mappings.
 
 The 'Mmap' gem is showing its age and won't compile with all Ruby versions,
 so this is a minimal FFI based implementation.
 
-**WARNING**: This is **VERY** incomplete as of writing this. 
+
+## Why you'd want to consider Mmap for random access to large files
+
+There's a basic benchmark included. Try "make bench". Here are results
+from my laptop:
+
+```
+$ make bench
+docker run -t -i -v /home/vidarh/src/repos/purecdb/ffi-mmap:/app ffi-mmap ruby tests/bench.rb
+Doing 100000 operations
+
+       user     system      total        real
+       seek/read (64K reads):                      0.650000   1.480000   2.130000 (  2.136277)
+       seek/read (4K reads):                       0.200000   0.180000   0.380000 (  0.379838)
+       mmap (including mmap/unmap; 64K reads):     0.000000   0.000000   0.000000 (  0.000164)
+       mmap (including mmap/unmap; 4K reads):      0.000000   0.000000   0.000000 (  0.000070)
+       mmap (excluding mmap/unmap; 64K reads):     0.000000   0.000000   0.000000 (  0.000045)
+       mmap (excluding mmap/unmap; 4K reads):      0.000000   0.000000   0.000000 (  0.000014)
+```
+
+Caveats: Benchmarks are lies, and more lies; In this case the file used is 10MB, which is 
+small enough that the more operations the more of the file will be cached in RAM. This 
+favours the mmap solution. The more the file exceeds RAM size, the less favourable things
+will be for mmap. But I don't feel like writing a multi-GB file to test with - feel free to
+submit data. And make sure to benchmark your *actual* workload. Order of operations and actually
+touching more of the mmap'd data might make a difference too, though reordering the tests
+above have very little impact on the outcome.
+
 
 ## Installation
 

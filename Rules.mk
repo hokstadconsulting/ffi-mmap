@@ -30,3 +30,6 @@ spec:
 
 cli:
 	${DR} /bin/bash -l
+
+bench:
+	${DR} ruby tests/bench.rb
