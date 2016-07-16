@@ -22,8 +22,8 @@ module FFI
         end
         
         # Called automatically on gc thanks to FFI::AutoPointer wrapper around @m
-        def munmap(_)
-            Internal.munmap(@m,@len)
+        def munmap(_=nil)
+            Internal.munmap(@m,@size)
             @m = nil
         end
         
